@@ -7,7 +7,7 @@ const App = () => {
   const [newNote, setNewNote] = useState('')
   const [showAll, setShowAll] = useState(true)
 
-  useEffect(() => {
+  const hook = () => {
     console.log('effect')
     axios
       .get('http://localhost:3001/notes')
@@ -15,7 +15,9 @@ const App = () => {
         console.log('promise fulfilled')
         setNotes(response.data)
       })
-  }, [])
+  }
+  
+  useEffect(hook, [])
 
   console.log('render', notes.length, 'notes')
 
@@ -28,20 +30,29 @@ const App = () => {
     ? notes
     : notes.filter(note => note.important === true)
 
-  const addNote = (event) => {
+  const addNote = event => {
     event.preventDefault()
     const noteObject = {
+      id: '',
       content: newNote,
-      date: new Date().toISOString(),
+      date: new Date(),
       important: Math.random() < 0.5,
-      id: notes.length + 1,
     }
+
+    axios
+      .post('http://localhost:3001/notes', noteObject)
+      .then(response => {
+        setNotes(notes.concat(response.data))
+        setNewNote('')  
+      })
 
     setNotes(notes.concat(noteObject))
     setNewNote('')
   }
 
+  console.log('note', notes)
   return (
+  
     <div>
       <h1>Notes</h1>
       <div>
